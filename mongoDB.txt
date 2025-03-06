@@ -1,0 +1,116 @@
+1. findOne()-> used to retrieve a single document from the mongodb collection that matches a given query.
+-> it returns the first matching document or null.
+
+Example:
+const user = await User.findOne({ email: "test@example.com" });
+if (!user) {
+    console.log("User not found");
+} else {
+    console.log("User found:", user);
+}
+
+2. find()-> used to retrieve all the documents that matches the given query condition.
+-> it returns an array of matching documents.
+
+Example:
+const admins = await User.find({ role: "admin" });
+console.log("Admin Users:", admins);
+
+3. findById()-> finds a document by its unique mongodb object id.
+-> returns a single document if found otherwise null.
+
+Example:
+const user = await User.findById("65f8e8b4d2a9a75b8c7a5678");
+console.log("User Details:", user);
+
+4. create()-> used to insert the new document into the database
+-> automatically saves the document
+
+Example:
+const newUser = await User.create({
+    name: "John Doe",
+    email: "john@example.com",
+    password: "securePassword123",
+    number: 1234432242,
+});
+console.log("User Created:", newUser);
+
+5. save()-> used to save a document after making changes
+
+Example:
+const user = await User.findOne({ email: "john@example.com" });
+if (user) {
+    user.password = "newSecurePassword123";
+    await user.save();
+    console.log("Password updated!");
+}
+
+6. updateOne()-> used to modify a single document matching the given condition
+
+Example:
+await User.updateOne({ email: "john@example.com" }, { $set: { role: "admin" } });
+console.log("User role updated!");
+
+7. updateMany()-> update all documents that match the query condition
+
+Example:
+await User.updateMany({ role: "user" }, { $set: { role: "member" } });
+console.log("Updated roles for all users");
+
+8. findOneAndUpdate()-> finds a document, update it and returns the document
+
+Example:
+const updatedUser = await User.findOneAndUpdate(
+    { email: "john@example.com" },
+    { $set: { name: "John Updated" } },
+    { new: true } // `new: true` ensures it returns the updated document
+);
+console.log("Updated User:", updatedUser);
+
+9. findOneAndDelete()-> finds a document, delete it and returns the deleted document
+-> useful when you need the delete document in reference
+
+Example:
+const deletedUser = await User.findOneAndDelete({ email: "john@example.com" });
+console.log("Deleted User:", deletedUser);
+
+10. deleteOne()-> deletes the first matching element
+
+Example:
+await User.deleteOne({ _id: "65f8e8b4d2a9a75b8c7a5678" });
+console.log("User deleted successfully!");
+
+11. deleteMany()-> delete all the documents that matches the condition
+
+Example:
+await User.deleteMany({ status: "inactive" });
+console.log("Deleted all inactive users!");
+
+12. countDocuments()-> used to count the number of documents that matches the given query
+
+Example:
+const adminCount = await User.countDocuments({ role: "admin" });
+console.log(`Total Admins: ${adminCount}`);
+
+13. exists()-> checks if the documents exists then returns true otherwise returns false
+
+Example:
+const userExists = await User.exists({ email: "test@example.com" });
+console.log("User exists?", userExists ? "Yes" : "No");
+
+14. distinct()-> returns distinct values from a specified feild
+
+Example:
+const roles = await User.distinct("role");
+console.log("Unique Roles:", roles);
+
+15. sort()-> used to sort the documents in ascending(1) or descending(-1)
+
+Example:
+const sortedUsers = await User.find().sort({ name: 1 }); // Ascending order
+console.log("Sorted Users:", sortedUsers);
+
+
+
+-> In UserModel.js --------> cartItems feild
+-> On Frontend ------------> /cart and /cart/${email}
