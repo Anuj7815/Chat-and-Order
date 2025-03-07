@@ -18,31 +18,10 @@ const Favorites = () => {
         }
     }, [dispatch, loggedInUserEmail]);
 
-    // useEffect(() => {
-    //     const getFavorites = async () => {
-    //         try {
-    //             const response = await fetchFavorites({
-    //                 email: loggedInUserEmail,
-    //             });
-    //             console.log(response);
-    //             dispatch(setFavorites(response));
-    //         } catch (error) {
-    //             console.log("Unable to fetch favorites");
-    //         }
-    //     };
-    //     getFavorites();
-    // }, [dispatch, loggedInUserEmail]);
-
     const handleFavoriteClick = async (prod) => {
         dispatch(
             toggleFavorite({ email: loggedInUserEmail, productId: prod._id })
         );
-
-        // const updatedFavorites = await toggleFavorite({
-        //     email: loggedInUserEmail,
-        //     productId: prod._id,
-        // });
-        // dispatch(setFavorites(updatedFavorites));
     };
 
     const cartItems = products.filter((prod) => favorites.includes(prod._id));

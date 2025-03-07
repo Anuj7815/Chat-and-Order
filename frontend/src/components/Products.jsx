@@ -23,9 +23,7 @@ const Products = () => {
 
     useEffect(() => {
         dispatch(fetchProducts());
-        dispatch(fetchCartItems({ email: loggedInUserEmail }));
-        dispatch(fetchFavorites({ email: loggedInUserEmail }));
-    }, [dispatch, loggedInUserEmail]);
+    }, [loggedInUserEmail]);
 
     const handleFavoriteClick = (prod) => {
         dispatch(

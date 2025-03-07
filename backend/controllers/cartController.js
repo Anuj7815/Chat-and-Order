@@ -27,9 +27,6 @@ const getCartItemsController = async (req, res) => {
 const postCartItemsController = async (req, res) => {
     try {
         const { email, productId, quantity = 1 } = req.body;
-        // console.log(productId);
-        // console.log(email);
-        // console.log(quantity);
 
         const user = await User.findOne({ email });
         if (!user) {
