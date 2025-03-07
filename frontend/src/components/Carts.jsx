@@ -1,15 +1,13 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-    fetchFavorites,
-    // toggleFavorite,
-    fetchCartItems,
+    fetchProducts,
+    toggleFavorite,
     addToCart,
-    removeFromCart,
-    // updateCartItemQuantity,
-} from "../features/cartSlice";
-// import { fetchProducts } from "../features/productSlice";
-import { fetchProducts, toggleFavorite } from "../api/apiUtil";
+    fetchFavorites,
+    fetchCartItems,
+} from "../api/apiUtil";
+import { setCartItems } from "../features/cartSlice";
 
 const Carts = () => {
     const dispatch = useDispatch();
@@ -21,14 +19,12 @@ const Carts = () => {
     const loggedInUserEmail = loggedInUser?.email;
 
     useEffect(() => {
-        if (loggedInUserEmail) {
-            dispatch(fetchProducts());
-            dispatch(fetchFavorites({ email: loggedInUserEmail }));
-            dispatch(fetchCartItems({ email: loggedInUserEmail }));
-        }
+        dispatch(fetchProducts());
+        dispatch(fetchCartItems({ email: loggedInUserEmail }));
     }, [dispatch, loggedInUserEmail]);
 
     const handleFavoriteClick = (prod) => {
+        // dispatch();
         dispatch(
             toggleFavorite({ email: loggedInUserEmail, productId: prod._id })
         );

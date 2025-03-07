@@ -1,13 +1,10 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-// import { fetchProducts } from "../features/productSlice";
-import { fetchProducts } from "../api/apiUtil";
-import {
-    // toggleFavorite,
-    fetchFavorites,
-    addToCart,
-} from "../features/cartSlice";
-import { toggleFavorite } from "../api/apiUtil";
+import { fetchCartItems, fetchProducts } from "../api/apiUtil";
+import { toggleFavorite, addToCart, fetchFavorites } from "../api/apiUtil";
+import { logoutSuccess } from "../features/authSlice";
+import { setProducts } from "../features/productSlice";
+import { setCartItems, setFavorites } from "../features/cartSlice";
 
 const Products = () => {
     const dispatch = useDispatch();
@@ -15,16 +12,19 @@ const Products = () => {
     const { favorites = [], cartItems = [] } = useSelector(
         (state) => state.cart
     );
-    const loggedInUser = JSON.parse(localStorage.getItem("user"));
-    const loggedInUserEmail = loggedInUser?.email || "";
-    // const [counter, setCounter] = useState(0);
-    console.log(cartItems);
+
+    const [loggedInUserEmail, setLoggedInUserEmail] = useState("");
 
     useEffect(() => {
-        if (loggedInUserEmail) {
-            dispatch(fetchProducts());
-            dispatch(fetchFavorites({ email: loggedInUserEmail }));
-        }
+        const loggedInUser = JSON.parse(localStorage.getItem("user"));
+        console.log(loggedInUser);
+        setLoggedInUserEmail(loggedInUser?.email || "");
+    }, []);
+
+    useEffect(() => {
+        dispatch(fetchProducts());
+        dispatch(fetchCartItems({ email: loggedInUserEmail }));
+        dispatch(fetchFavorites({ email: loggedInUserEmail }));
     }, [dispatch, loggedInUserEmail]);
 
     const handleFavoriteClick = (prod) => {
@@ -35,28 +35,23 @@ const Products = () => {
 
     const handleBuyNowClick = (prod) => {
         const cartArray = Object.values(cartItems);
-        // console.log(cartArray);
 
         const uniqueCartItems = cartArray.flat().map((cartItem) => {
             const productDetails = products.find(
                 (product) => product._id === cartItem.productId
             );
-
             return {
                 ...cartItem,
                 ...productDetails,
             };
         });
-
         console.log(uniqueCartItems);
 
         // Find the product inside uniqueCartItems
         const selectedCartItem = uniqueCartItems.find(
             (item) => item.productId === prod._id
         );
-
-        const quantity = selectedCartItem ? selectedCartItem.quantity + 1 : 1; // Increment if exists, else start from 1
-
+        const quantity = selectedCartItem ? selectedCartItem.quantity + 1 : 1;
         dispatch(
             addToCart({
                 email: loggedInUserEmail,
@@ -66,7 +61,7 @@ const Products = () => {
         );
     };
 
-    console.log(products);
+    // console.log(products);
 
     return (
         <div className="flex justify-center items-center min-h-screen p-10 bg-gray-200">

@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiShoppingCart } from "react-icons/fi";
 import viteLogo from "/vite.svg";
-import { useCart } from "./CartContext";
 import { FaShoppingCart } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchFavorites, fetchCartItems } from "../features/cartSlice";
+import { fetchFavorites, fetchCartItems } from "../api/apiUtil";
 import { CgProfile } from "react-icons/cg";
-// import BookmarksIcon from "@mui/icons-material/Bookmarks";
 import { GrFavorite } from "react-icons/gr";
+import { loginSuccess } from "../features/authSlice";
 
 const Navbar = ({ handleLogout }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { products } = useSelector((state) => state.products);
     const favorites = useSelector((state) => state.cart.favorites || []);
     const [favoriteCount, setFavoriteCount] = useState(favorites.length);
     const cart = useSelector((state) => state.cart.cartItems);
@@ -23,6 +20,7 @@ const Navbar = ({ handleLogout }) => {
 
     useEffect(() => {
         if (loggedInUserEmail) {
+            dispatch(loginSuccess());
             dispatch(fetchFavorites({ email: loggedInUserEmail }));
             dispatch(fetchCartItems({ email: loggedInUserEmail }));
         }

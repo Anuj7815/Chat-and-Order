@@ -10,7 +10,7 @@ const authMiddleware = async (req, res, next) => {
     }
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("Decoded Values: ", decoded);
+        // console.log("Decoded Values: ", decoded);
         req.user = decoded; //attach the user data to the req
         next();
     } catch (error) {

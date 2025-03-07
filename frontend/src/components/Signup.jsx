@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { signupApi } from "../api/apiUtil";
 
-const Signup = ({ setIsAuthenticated }) => {
+const Signup = () => {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -15,7 +15,7 @@ const Signup = ({ setIsAuthenticated }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const result = signupApi(formData, setIsAuthenticated);
+        const result = signupApi(formData);
         // console.log(result);
 
         if (result === "Failed") {

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { fetchProducts } from "../api/apiUtil";
 
 const initialState = {
@@ -9,28 +9,20 @@ const initialState = {
     error: null,
 };
 
-// export const fetchProducts = createAsyncThunk(
-//     "c/5e06-e209-449f-a485/",
-//     async (page, { rejectWithValue }) => {
-//         try {
-//             const response = await fetch("http://localhost:5000/products", {
-//                 credentials: "include",
-//             });
-//             const data = await response.json();
-//             // console.log(data);
-//             return data;
-//         } catch (error) {
-//             return rejectWithValue(error.message);
-//         }
-//     }
-// );
-
-// fetchProducts();
-
 const productSlice = createSlice({
     name: "products",
     initialState,
-    reducers: {},
+    reducers: {
+        setLoading: (state, action) => {
+            state.loading = action.payload;
+        },
+        setProducts: (state, action) => {
+            state.products = action.payload;
+        },
+        setError: (state, action) => {
+            state.error = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchProducts.pending, (state) => {
@@ -47,5 +39,5 @@ const productSlice = createSlice({
     },
 });
 
-export const { resetProducts } = productSlice.actions;
+export const { setLoading, setProducts, setError } = productSlice.actions;
 export default productSlice.reducer;

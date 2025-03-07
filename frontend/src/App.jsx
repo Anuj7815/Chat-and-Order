@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import "./App.css";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Home from "./components/Home";
@@ -13,29 +13,15 @@ import Carts from "./components/Carts";
 import Profile from "./components/Profile";
 import Favorites from "./components/Favorites";
 import { Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { handleLogout } from "./api/apiUtil";
 
 const App = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(
-        localStorage.getItem("isAuth") ? true : false
-    );
-    const navigate = useNavigate();
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
     useEffect(() => {
-        console.log("Checking authentication: ", isAuthenticated);
-    });
-
-    const handleLogout = async () => {
-        await fetch("http://localhost:5000/logout", {
-            method: "POST",
-            credentials: "include",
-        });
-
-        localStorage.removeItem("user");
-        localStorage.removeItem("isAuth");
-        setIsAuthenticated(false);
-        alert("Logout Success");
-        navigate("/login");
-    };
+        console.log("Checking authentication", isAuthenticated);
+    }, [isAuthenticated]);
 
     return (
         <>
@@ -44,23 +30,11 @@ const App = () => {
             <Routes>
                 <Route
                     path="/login"
-                    element={
-                        isAuthenticated ? (
-                            <Navigate to="/" />
-                        ) : (
-                            <Login setIsAuthenticated={setIsAuthenticated} />
-                        )
-                    }
+                    element={isAuthenticated ? <Navigate to="/" /> : <Login />}
                 />
                 <Route
                     path="/signup"
-                    element={
-                        isAuthenticated ? (
-                            <Navigate to="/" />
-                        ) : (
-                            <Signup setIsAuthenticated={setIsAuthenticated} />
-                        )
-                    }
+                    element={isAuthenticated ? <Navigate to="/" /> : <Signup />}
                 />
 
                 {isAuthenticated ? (

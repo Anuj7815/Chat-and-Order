@@ -1,11 +1,7 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-    fetchFavorites,
-    //   toggleFavorite
-} from "../features/cartSlice";
-// import { fetchProducts } from "../features/productSlice";
-import { fetchProducts, toggleFavorite } from "../api/apiUtil";
+import { fetchProducts, toggleFavorite, fetchFavorites } from "../api/apiUtil";
+import { setFavorites } from "../features/cartSlice";
 
 const Favorites = () => {
     const dispatch = useDispatch();
@@ -14,6 +10,7 @@ const Favorites = () => {
     const loggedInUser = JSON.parse(localStorage.getItem("user"));
     const loggedInUserEmail = loggedInUser?.email;
 
+    // working fine until last modified
     useEffect(() => {
         if (loggedInUserEmail) {
             dispatch(fetchProducts());
@@ -21,11 +18,31 @@ const Favorites = () => {
         }
     }, [dispatch, loggedInUserEmail]);
 
-    const handleFavoriteClick = (prod) => {
-        // console.log(prod.id);
+    // useEffect(() => {
+    //     const getFavorites = async () => {
+    //         try {
+    //             const response = await fetchFavorites({
+    //                 email: loggedInUserEmail,
+    //             });
+    //             console.log(response);
+    //             dispatch(setFavorites(response));
+    //         } catch (error) {
+    //             console.log("Unable to fetch favorites");
+    //         }
+    //     };
+    //     getFavorites();
+    // }, [dispatch, loggedInUserEmail]);
+
+    const handleFavoriteClick = async (prod) => {
         dispatch(
             toggleFavorite({ email: loggedInUserEmail, productId: prod._id })
         );
+
+        // const updatedFavorites = await toggleFavorite({
+        //     email: loggedInUserEmail,
+        //     productId: prod._id,
+        // });
+        // dispatch(setFavorites(updatedFavorites));
     };
 
     const cartItems = products.filter((prod) => favorites.includes(prod._id));
@@ -67,16 +84,6 @@ const Favorites = () => {
                                 <p className="text-gray-600">
                                     {item.description}
                                 </p>
-                                {/* <div className="card-actions mt-2 flex justify-end">
-                                    <button
-                                        className="btn bg-gray-900 px-4 py-3 rounded-full text-white cursor-pointer hover:bg-gray-700"
-                                        // onClick={() =>
-                                        //     dispatch(addToCart(prod))
-                                        // }
-                                    >
-                                        Buy Now
-                                    </button>
-                                </div> */}
                             </div>
                         </div>
                     ))}
