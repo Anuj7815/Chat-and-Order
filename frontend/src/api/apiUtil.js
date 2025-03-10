@@ -21,8 +21,13 @@ export const loginApi = async (formData) => {
         console.log(data);
 
         if (response.status === 200) {
-            // dispactch(loginSuccess());
             return data;
+        } else if (response.status === 400) {
+            console.log("Bad Request! Please login again");
+            return null;
+        } else if (response.status === 401) {
+            console.log("Invalid Email address or password!");
+            return null;
         } else {
             return null;
         }
@@ -47,14 +52,19 @@ export const signupApi = async (formData, setIsAuthenticated) => {
         const data = await response.json();
         console.log(data);
 
-        if (response.ok) {
-            setIsAuthenticated(true);
-            localStorage.setItem("isAuth", true);
-            localStorage.setItem("user", JSON.stringify(data.user));
-            alert("User Registered Successfully");
-            return "Success";
+        if (response.status === 409) {
+            console.log("User email already exists");
+            alert("User email already exists");
+            return null;
+        } else if (response.status === 400) {
+            console.log("Bad Request");
+            return null;
+        } else if (response.status === 201) {
+            console.log("User created Successfully");
+            return data;
         } else {
-            return "Failed";
+            console.log("Internal Server Error");
+            return null;
         }
     } catch (error) {
         console.log(`Unknown Error Occured while Signup:`, error.message);
@@ -63,15 +73,20 @@ export const signupApi = async (formData, setIsAuthenticated) => {
 
 // handles logout API
 export const handleLogout = async () => {
-    await fetch(`${URL}/logout`, {
-        method: "POST",
-        credentials: "include",
-    });
-
-    localStorage.removeItem("user");
-    localStorage.removeItem("isAuth");
-    alert("Logout Success");
-    Navigate("/login");
+    try {
+        const response = await fetch(`${URL}/logout`, {
+            method: "POST",
+            credentials: "include",
+        });
+        console.log(response);
+        if (response.status === 200) {
+            localStorage.removeItem("user");
+            localStorage.removeItem("isAuth");
+            alert("Logout Success");
+        }
+    } catch (error) {
+        console.log("Unknown Error Occurred while logout: ", error.message);
+    }
 };
 
 // handles users API
@@ -81,13 +96,16 @@ export const usersApi = async (setUsers) => {
             credentials: "include",
         });
         console.log(response);
-        const data = await response.json();
-        console.log(data);
 
-        if (response.ok) {
+        if (response.status === 404) {
+            console.log("User does not found");
+            return;
+        } else if (response.status === 200) {
+            const data = await response.json();
+            console.log(data);
             setUsers(data);
         } else {
-            alert("Unable to fetch the users data. Please login again.");
+            console.log("Internal Server Error. Please login again!");
             handleLogout();
         }
     } catch (error) {
@@ -107,33 +125,20 @@ export const fetchProducts = createAsyncThunk(
             const response = await fetch(`${URL}/products`, {
                 credentials: "include",
             });
-            const data = await response.json();
-            console.log(data);
-            return data;
+
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log(data);
+                return data;
+            } else {
+                console.log("Internal Server Error");
+                return;
+            }
         } catch (error) {
             return rejectWithValue(error.message);
         }
     }
 );
-
-// export const fetchProducts = async () => {
-//     try {
-//         const response = await fetch(`${URL}/products`, {
-//             credentials: "include",
-//         });
-//         console.log(response);
-//         const data = await response.json();
-//         console.log(data);
-
-//         if (response.status === 200) {
-//             return data;
-//         } else {
-//             return null;
-//         }
-//     } catch (error) {
-//         console.log("Unable to fetch the Products data: ", error.message);
-//     }
-// };
 
 // toggling favorites
 export const toggleFavorite = createAsyncThunk(
@@ -150,9 +155,15 @@ export const toggleFavorite = createAsyncThunk(
             body: JSON.stringify({ email, productId }),
         });
         console.log(response);
-        const data = await response.json();
-        // console.log(data.favorites);
-        return data.favorites;
+        if (response.status === 404) {
+            console.log("User does not exists");
+        } else if (response.status === 200) {
+            const data = await response.json();
+            // console.log(data.favorites);
+            return data.favorites;
+        } else {
+            console.log("Internal Server Error");
+        }
     }
 );
 
@@ -199,41 +210,24 @@ export const addToCart = createAsyncThunk(
         });
 
         console.log(response);
-        const data = await response.json();
-        console.log(data.cartItems);
-        return data.cartItems;
+        if (response.status === 404) {
+            console.log(
+                "User does not exist. Unable to enter the items into the cart"
+            );
+        } else if (response.status === 200) {
+            const data = await response.json();
+            console.log(data.cartItems);
+            return data.cartItems;
+        } else {
+            console.log("Internal Server Error");
+        }
     }
 );
-
-// export const addToCart = async ({ email, productId, quantity }) => {
-//     console.log(email);
-//     console.log(productId);
-//     console.log(quantity);
-
-//     try {
-//         const response = await fetch(`${URL}/cart`, {
-//             method: "POST",
-//             credentials: "include",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify({ email, productId, quantity }),
-//         });
-//         console.log("Add To cart response: ", response);
-//         const data = await response.json();
-//         console.log("Add to cart Data: ", data.cartItems);
-//         if (response.status === 200) {
-//             return data.cartItems;
-//         } else return null;
-//     } catch (error) {
-//         console.log("Unable to add the items into the cart");
-//     }
-// };
 
 export const fetchFavorites = createAsyncThunk(
     "/favorites/fetchFavorites",
     async ({ email }) => {
-        console.log("inside favorites api:");
+        console.log("Inside favorites api:");
         if (!email) {
             throw new Error(`Email is required to fetch favorites`);
         }
@@ -248,40 +242,18 @@ export const fetchFavorites = createAsyncThunk(
         });
 
         console.log(response);
-
-        if (!response.ok) {
-            throw new Error(
-                `Error whil fetching favorites: ${response.status}`
-            );
+        if (response.status === 404) {
+            console.log("favorite items does not found");
+        } else if (response.status === 200) {
+            const data = await response.json();
+            console.log(data.favorites);
+            // console.log(data.data.favorites);
+            return data.favorites;
+        } else {
+            console.log("Internal Server Error");
         }
-        // console.log(response);
-        const data = await response.json();
-        // console.log(data.favorites);
-        return data.favorites;
     }
 );
-
-// export const fetchFavorites = async ({ email }) => {
-//     try {
-//         const response = await fetch(`${URL}/favorites/${email}`, {
-//             method: "GET",
-//             credentials: "include",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//         });
-//         console.log("Favorites Response: ", response);
-//         const data = await response.json();
-//         console.log("Favorites Data: ", data);
-//         if (response.status === 200) {
-//             return data.favorites;
-//         } else {
-//             return null;
-//         }
-//     } catch (error) {
-//         console.log("Unable to fetch the favorite items");
-//     }
-// };
 
 export const fetchCartItems = createAsyncThunk(
     "cart/fetchCartItems",
@@ -297,35 +269,14 @@ export const fetchCartItems = createAsyncThunk(
 
         console.log(response);
 
-        if (!response.ok) {
-            throw new Error(`Error while fetching the cart Items`);
+        if (response.status === 404) {
+            console.log("Cart Items not found");
+            return null;
+        } else if (response.status === 200) {
+            const data = await response.json();
+            return data;
+        } else {
+            console.log("Internal Server Error");
         }
-
-        // console.log(response);
-        const data = await response.json();
-        // console.log(data);
-        return data;
     }
 );
-
-// export const fetchCartItems = async ({ email }) => {
-//     try {
-//         const response = await fetch(`${URL}/cart/${email}`, {
-//             method: "GET",
-//             credentials: "include",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//         });
-//         console.log("Cart Items response: ", response);
-//         const data = await response.json();
-//         console.log("Cart items data: ", data);
-//         if (response.status === 200) {
-//             return data;
-//         } else {
-//             return null;
-//         }
-//     } catch (error) {
-//         console.log("Unable to fetch the cart items");
-//     }
-// };

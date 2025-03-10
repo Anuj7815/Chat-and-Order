@@ -1,66 +1,50 @@
 const User = require("../models/UserModel");
+const {
+    handleSuccess,
+    handleError,
+    handleController,
+} = require("../util/responseHandlerUtil");
 
-const getCartItemsController = async (req, res) => {
-    try {
-        const userEmail = req.params.email;
-        // console.log(userEmail);
+const getCartItemsController = handleController(async (req, res) => {
+    const userEmail = req.params.email;
 
-        const items = await User.findOne({ email: userEmail }).populate(
-            "cartItems"
-        );
+    const user = await User.findOne({ email: userEmail }).populate("cartItems");
 
-        // console.log(items);
-
-        if (!items) {
-            res.status(404).json({ message: "Cart Items does not found" });
-        }
-        return res.json({
-            cartItems: items
-                ? items.cartItems.map((productId) => productId)
-                : [],
-        });
-    } catch (error) {
-        res.json(500).json({ message: "Unknown Error Occured" });
+    if (!user) {
+        return handleError(res, null, "Cart Items not found", 404);
     }
-};
 
-const postCartItemsController = async (req, res) => {
-    try {
-        const { email, productId, quantity = 1 } = req.body;
+    return handleSuccess(res, {
+        cartItems: user.cartItems || [],
+    });
+});
 
-        const user = await User.findOne({ email });
-        if (!user) {
-            res.status(404).json({ message: "User Does not exists" });
-        }
+const postCartItemsController = handleController(async (req, res) => {
+    const { email, productId, quantity = 1 } = req.body;
 
-        // console.log(user);
+    const user = await User.findOne({ email });
+    if (!user) {
+        return handleError(res, null, "User does not exist", 404);
+    }
 
-        const inCartIndex = user.cartItems.findIndex(
-            (item) => item.productId.toString() === productId
-        );
+    const inCartIndex = user.cartItems.findIndex(
+        (item) => item.productId.toString() === productId
+    );
 
-        // console.log(inCartIndex);
-
-        if (inCartIndex > -1) {
-            if (quantity <= 0) {
-                user.cartItems.splice(inCartIndex, 1);
-            } else if (quantity > user.cartItems[inCartIndex].quantity) {
-                user.cartItems[inCartIndex].quantity =
-                    (user.cartItems[inCartIndex].quantity || 0) + 1;
-            } else {
-                user.cartItems[inCartIndex].quantity =
-                    user.cartItems[inCartIndex].quantity - 1;
-            }
+    if (inCartIndex > -1) {
+        if (quantity <= 0) {
+            user.cartItems.splice(inCartIndex, 1);
+        } else if (quantity > user.cartItems[inCartIndex].quantity) {
+            user.cartItems[inCartIndex].quantity += 1;
         } else {
-            user.cartItems.push({ productId, quantity });
+            user.cartItems[inCartIndex].quantity -= 1;
         }
-
-        await user.save();
-        // console.log(user);
-        res.json({ cartItems: user.cartItems });
-    } catch (error) {
-        console.log(`Unable to insert into the cart items`);
+    } else {
+        user.cartItems.push({ productId, quantity });
     }
-};
+
+    await user.save();
+    return handleSuccess(res, { cartItems: user.cartItems });
+});
 
 module.exports = { getCartItemsController, postCartItemsController };

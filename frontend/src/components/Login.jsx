@@ -28,7 +28,6 @@ const Login = () => {
             setFormData({ email: "", password: "" });
             alert("Login Success");
         } else {
-            console.log("Error while login! Please try again later");
             dispatch(logoutSuccess());
         }
     };

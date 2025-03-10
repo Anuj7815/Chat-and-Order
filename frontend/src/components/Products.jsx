@@ -23,7 +23,7 @@ const Products = () => {
 
     useEffect(() => {
         dispatch(fetchProducts());
-    }, [loggedInUserEmail]);
+    }, []);
 
     const handleFavoriteClick = (prod) => {
         dispatch(

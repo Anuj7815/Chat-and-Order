@@ -16,7 +16,7 @@ const Favorites = () => {
             dispatch(fetchProducts());
             dispatch(fetchFavorites({ email: loggedInUserEmail }));
         }
-    }, [dispatch, loggedInUserEmail]);
+    }, [loggedInUserEmail]);
 
     const handleFavoriteClick = async (prod) => {
         dispatch(

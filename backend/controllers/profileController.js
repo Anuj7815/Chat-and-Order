@@ -1,70 +1,64 @@
 const User = require("../models/UserModel");
 const cloudinary = require("../config/cloudinary");
+const {
+    handleSuccess,
+    handleError,
+    handleController,
+} = require("../util/responseHandlerUtil");
 
-const getUserInfoController = async (req, res) => {
-    try {
-        const { email } = req.query;
-        // console.log(req.body);
-        const user = await User.findOne({ email });
-        // console.log(user);
+const getUserInfoController = handleController(async (req, res) => {
+    const { email } = req.query;
+    const user = await User.findOne({ email });
 
-        if (!user) {
-            return res
-                .status(404)
-                .json({ message: "User does not exists in the database" });
-        }
-
-        res.status(200).json(user);
-    } catch (error) {
-        console.error(`Error occured while fetching the data:`);
-        return res.status(404).json({ message: "Server Error" });
-    }
-};
-
-const postUserInfoController = async (req, res) => {
-    try {
-        const { name, email, contactNumber, address, age } = req.body;
-        console.log(req.body);
-
-        let profilePictureUrl = null;
-
-        if (req.files && req.files.profilePicture) {
-            const file = req.files.profilePicture;
-            // console.log(file);
-            const uploadResult = await cloudinary.uploader.upload(
-                file.tempFilePath,
-                {
-                    folder: "profile_pictures",
-                }
-            );
-            // console.log(uploadResult);
-            profilePictureUrl = uploadResult.secure_url;
-            // console.log(profilePictureUrl);
-        }
-
-        const updatedUser = await User.findOneAndUpdate(
-            { email: email },
-            {
-                name,
-                contactNumber,
-                address,
-                age,
-                ...(profilePictureUrl && { profilePicture: profilePictureUrl }),
-            },
-            { new: true, runValidators: true }
+    if (!user) {
+        return handleError(
+            res,
+            "User not found",
+            "User does not exist in the database",
+            404
         );
-
-        if (!updatedUser) {
-            return res
-                .status(404)
-                .json({ message: "User not found in the database" });
-        }
-
-        return res.status(200).json(updatedUser);
-    } catch (error) {
-        console.error("Error while updating the user information");
-        return res.status(500).json({ message: "Server Error" });
     }
-};
+
+    handleSuccess(res, user);
+});
+
+const postUserInfoController = handleController(async (req, res) => {
+    const { name, email, contactNumber, address, age } = req.body;
+    let profilePictureUrl = null;
+
+    if (req.files?.profilePicture) {
+        const file = req.files.profilePicture;
+        const uploadResult = await cloudinary.uploader.upload(
+            file.tempFilePath,
+            {
+                folder: "profile_pictures",
+            }
+        );
+        profilePictureUrl = uploadResult.secure_url;
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+        { email },
+        {
+            name,
+            contactNumber,
+            address,
+            age,
+            ...(profilePictureUrl && { profilePicture: profilePictureUrl }),
+        },
+        { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+        return handleError(
+            res,
+            "User not found",
+            "User not found in the database",
+            404
+        );
+    }
+
+    handleSuccess(res, updatedUser);
+});
 
 module.exports = { getUserInfoController, postUserInfoController };

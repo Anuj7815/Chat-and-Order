@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { signupApi } from "../api/apiUtil";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../features/authSlice";
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -9,24 +11,29 @@ const Signup = () => {
         contactNumber: "",
     });
 
+    const dispatch = useDispatch();
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const result = signupApi(formData);
+        const result = await signupApi(formData);
         // console.log(result);
 
-        if (result === "Failed") {
-            alert("Unable to Signup the user");
+        if (result !== null) {
+            dispatch(loginSuccess());
+            localStorage.setItem("isAuth", true);
+            localStorage.setItem("user", JSON.stringify(result.user));
+            setFormData({
+                name: "",
+                email: "",
+                password: "",
+                contactNumber: "",
+            });
+            alert("Login Success");
         }
-        setFormData({
-            name: "",
-            email: "",
-            password: "",
-            contactNumber: "",
-        });
     };
 
     return (

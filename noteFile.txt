@@ -1,0 +1,19 @@
+1. authController -> 
+-> signup: finding user with email
+-> login: finding user with email
+
+2. favoriteController-> 
+-> getFavoriteController: getting email in params and then finding favorites based on that email
+-> toggleFavoriteController: finding user with email
+
+3. cartController->
+-> getCartItemsController: finding user with email
+-> postCartItemsController: finding user with email
+
+4. productController-> finding all products from ProductModel
+
+5. profileController->
+-> getUserInfoController: finding user with email
+-> postUserInfoController: updating user data based on the email
+
+6. userController-> finding all the users from the userModel

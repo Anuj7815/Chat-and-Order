@@ -1,53 +1,50 @@
 const User = require("../models/UserModel");
+const {
+    handleSuccess,
+    handleError,
+    handleController,
+} = require("../util/responseHandlerUtil");
 
-// returns cart items to the frontend
+// Get favorite items for a user
+const getFavoriteController = handleController(async (req, res) => {
+    const userEmail = req.params.email;
 
-const getFavoriteController = async (req, res) => {
-    try {
-        const userEmail = req.params.email;
-        // console.log(userEmail);
-        const favorite = await User.findOne({ email: userEmail }).populate(
-            "favorites"
+    const favorite = await User.findOne({ email: userEmail }).populate(
+        "favorites"
+    );
+
+    if (!favorite) {
+        return handleError(res, "User not found", "User does not exist.", 404);
+    }
+
+    handleSuccess(res, {
+        favorites: favorite.favorites
+            ? favorite.favorites.map((prod) => prod._id)
+            : [],
+    });
+});
+
+// Toggle favorite (add/remove) for a user
+const toggleFavoriteController = handleController(async (req, res) => {
+    const { email, productId } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        return handleError(res, "User not found", "User does not exist.", 404);
+    }
+
+    const isFavorite = user.favorites.includes(productId);
+
+    if (isFavorite) {
+        user.favorites = user.favorites.filter(
+            (id) => id.toString() !== productId
         );
-        // console.log(favorite);
-        if (!favorite) {
-            return res.status(404).json({ message: "User does not Found." });
-        }
-        // console.log(favorite.favorites);
-        res.json({
-            favorites: favorite
-                ? favorite.favorites.map((prod) => prod._id)
-                : [],
-        });
-    } catch (error) {
-        res.status(500).json({ message: "Unknown error Occured" });
+    } else {
+        user.favorites.push(productId);
     }
-};
 
-// saves the items into the cart items/favorites
-
-const toggleFavoriteController = async (req, res) => {
-    try {
-        const { email, productId } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const isFavorite = user.favorites.includes(productId);
-        // console.log(isFavorite);
-        if (isFavorite) {
-            user.favorites = user.favorites.filter(
-                (id) => id.toString() !== productId
-            );
-        } else {
-            user.favorites.push(productId);
-        }
-        await user.save();
-        res.json({ favorites: user.favorites });
-    } catch (error) {
-        res.status(500).json({ error: "Server Error" });
-    }
-};
+    await user.save();
+    handleSuccess(res, { favorites: user.favorites });
+});
 
 module.exports = { getFavoriteController, toggleFavoriteController };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import viteLogo from "/vite.svg";
 import { FaShoppingCart } from "react-icons/fa";
@@ -6,29 +6,34 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchFavorites, fetchCartItems } from "../api/apiUtil";
 import { CgProfile } from "react-icons/cg";
 import { GrFavorite } from "react-icons/gr";
-import { loginSuccess } from "../features/authSlice";
+import { loginSuccess, logoutSuccess } from "../features/authSlice";
 
-const Navbar = ({ handleLogout }) => {
+const Navbar = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const favorites = useSelector((state) => state.cart.favorites || []);
-    const [favoriteCount, setFavoriteCount] = useState(favorites.length);
+    // const [favoriteCount, setFavoriteCount] = useState(favorites.length);
+    const favoriteCount = favorites.length;
     const cart = useSelector((state) => state.cart.cartItems);
-    const cartCount = Object.values(cart).flat();
+    const cartCount = Object.values(cart).flat().length;
     const loggedInUser = JSON.parse(localStorage.getItem("user"));
     const loggedInUserEmail = loggedInUser?.email || "";
 
     useEffect(() => {
-        if (loggedInUserEmail) {
-            dispatch(loginSuccess());
-            dispatch(fetchFavorites({ email: loggedInUserEmail }));
-            dispatch(fetchCartItems({ email: loggedInUserEmail }));
-        }
-    }, [dispatch, loggedInUserEmail]);
+        if (!loggedInUserEmail) return;
+        dispatch(loginSuccess());
+        dispatch(fetchFavorites({ email: loggedInUserEmail }));
+        dispatch(fetchCartItems({ email: loggedInUserEmail }));
+    }, []);
 
-    useEffect(() => {
-        setFavoriteCount(favorites.length);
-    }, [favorites, cart]);
+    // useEffect(() => {
+    //     setFavoriteCount(favorites.length);
+    // }, [favorites, cart]);
+
+    const handleLogout = () => {
+        dispatch(logoutSuccess());
+        navigate("/login");
+    };
 
     return (
         <nav className="bg-gray-900 shadow-md py-3 px-6 flex justify-between items-center">
@@ -73,7 +78,7 @@ const Navbar = ({ handleLogout }) => {
                     className="relative flex items-center text-sm font-semibold text-gray-900 dark:text-white cursor-pointer"
                 >
                     <span className="absolute -top-3 -right-2 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs rounded-full">
-                        {cartCount.length > 0 ? cartCount.length : 0}
+                        {cartCount > 0 ? cartCount : 0}
                     </span>
                     <FaShoppingCart className="text-lg" size={20} />
                 </a>

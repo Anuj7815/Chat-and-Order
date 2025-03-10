@@ -1,12 +1,13 @@
 const Product = require("../models/ProductModel");
+const {
+    handleSuccess,
+    handleError,
+    handleController,
+} = require("../util/responseHandlerUtil");
 
-const productController = async (req, res) => {
-    try {
-        const products = await Product.find();
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({ error: "Server Error" });
-    }
-};
+const productController = handleController(async (req, res) => {
+    const products = await Product.find();
+    return handleSuccess(res, products);
+});
 
 module.exports = productController;
