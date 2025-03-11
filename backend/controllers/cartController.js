@@ -14,6 +14,8 @@ const getCartItemsController = handleController(async (req, res) => {
         return handleError(res, null, "Cart Items not found", 404);
     }
 
+    // console.log("Cart Items: ", user.cartItems);
+
     return handleSuccess(res, {
         cartItems: user.cartItems || [],
     });

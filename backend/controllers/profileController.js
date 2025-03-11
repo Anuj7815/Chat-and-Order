@@ -4,6 +4,7 @@ const {
     handleSuccess,
     handleError,
     handleController,
+    findUserByEmail,
 } = require("../util/responseHandlerUtil");
 
 const getUserInfoController = handleController(async (req, res) => {

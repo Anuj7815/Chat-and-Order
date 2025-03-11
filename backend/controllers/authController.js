@@ -65,10 +65,10 @@ const signup = handleController(async (req, res) => {
 
 const login = handleController(async (req, res) => {
     const { email, password } = req.body;
-    console.log(email, password);
+    // console.log(email, password);
 
     const user = await User.findOne({ email });
-    console.log(user);
+    // console.log(user);
     if (!user) {
         // 401- unauthorized User
         return handleError(
@@ -100,27 +100,3 @@ const login = handleController(async (req, res) => {
 });
 
 module.exports = { signup, login };
-
-// 100-199 -> informational responses
-
-// 200-299 -> Successfullt responses
-// 200-> the request succeeded
-// 201-> the request succeeded and the new resource was created as a result.
-
-// 300-399 -> redirectional messages
-// 300-> multiple choices
-// 301-> the url of the requested resource has been changed permanently. The new url is given to the response.
-
-// 400-499 -> client error responses
-// 400-> bad request (the server cannot or will not process the request due to something that is perceived to be the client error)
-//  401-> unauthorized /unauthenticated
-// 403-> forbidden (the client does not have access rights to the content that is, it is unauthorized, so the server is refusing to give the requested resource.)
-// Note: unlike 401 unauthrized , in 403 the client's identity is known to the server
-// 404- not found-> the server cannot find the requested resource
-// 408-> request timeout
-// 409-> conflict -> this response is sent when a request conflicts with the current state of the server.
-
-// 500-509 -> server error responses
-// 500-> internal server error-> the server has encountered a situation and it does not know how to handle it
-// 501-> not implemented -> the request method is not supported by the server and cannot be handled.
-// 502-> bad gateway-> while working as a gateway to get a response needed to handle the request, got an invalid response.

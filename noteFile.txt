@@ -17,3 +17,15 @@
 -> postUserInfoController: updating user data based on the email
 
 6. userController-> finding all the users from the userModel
+
+****************************************************************
+*********************Workflow of the website********************
+
+1. Signup-> When user signup then at backend 4 cases can arise
+-> 409: user email already exists 
+-> 400: bad request, for some reason response cannot be handled 
+-> 201: user successfully created.
+-> 500: Internal Server Error
+
+-> Based on the four cases frontend handles the code and shows it on the UI/console.
+-> If success: setting isAuth and user data into the localStorage

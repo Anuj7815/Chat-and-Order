@@ -1,3 +1,4 @@
+const User = require("../models/UserModel");
 const handleSuccess = (res, data, statusCode = 200) => {
     return res.status(statusCode).json(data);
 };
@@ -8,7 +9,7 @@ const handleError = (
     message = "Server Error",
     statusCode = 500
 ) => {
-    console.error("Error:", error || message);
+    // console.error("Error:", error || message);
     return res.status(statusCode).json({ message });
 };
 
@@ -20,4 +21,15 @@ const handleController = (callback) => async (req, res) => {
     }
 };
 
-module.exports = { handleSuccess, handleError, handleController };
+const findUserByEmail = async (email) => {
+    return await User.findOne({ email });
+};
+
+// module.exports = { findUserByEmail };
+
+module.exports = {
+    handleSuccess,
+    handleError,
+    handleController,
+    findUserByEmail,
+};
