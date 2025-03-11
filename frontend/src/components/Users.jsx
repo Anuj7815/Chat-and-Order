@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import React from "react";
 import { usersApi } from "../api/apiUtil";
+import { logoutSuccess } from "../features/authSlice";
 
 const UsersPage = () => {
     const [users, setUsers] = useState([]);
@@ -10,7 +11,16 @@ const UsersPage = () => {
 
     // Fetch users from backend
     useEffect(() => {
-        usersApi(setUsers);
+        const fetchUsersData = async () => {
+            const data = await usersApi();
+            // console.log(data);
+            if (data.success === false) {
+                dispatchEvent(logoutSuccess());
+                navigate("/login");
+            }
+            setUsers(data);
+        };
+        fetchUsersData();
     }, []);
 
     // Delete user

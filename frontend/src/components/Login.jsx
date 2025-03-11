@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { loginApi } from "../api/apiUtil";
 import { useDispatch } from "react-redux";
 import { loginSuccess, logoutSuccess } from "../features/authSlice";
+import { toast } from "react-toastify";
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -26,7 +27,12 @@ const Login = () => {
             localStorage.setItem("isAuth", true);
             localStorage.setItem("user", JSON.stringify(result.user));
             setFormData({ email: "", password: "" });
-            alert("Login Success");
+            // alert("Login Success");
+            // toast("Login Success");
+            toast.success("Login Success!", {
+                position: "top-center",
+                autoClose: 3000,
+            });
         } else {
             dispatch(logoutSuccess());
         }

@@ -8,8 +8,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+noteFile.txt
 dist
 dist-ssr
+firebase
 *.local
 
 # Editor directories and files

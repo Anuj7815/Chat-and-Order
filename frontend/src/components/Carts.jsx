@@ -8,6 +8,9 @@ import {
     fetchCartItems,
 } from "../api/apiUtil";
 import { setCartItems } from "../features/cartSlice";
+import { setFavorites } from "../features/cartSlice";
+import { toast } from "react-toastify";
+import { fetchProductsSuccess } from "../features/productSlice";
 
 const Carts = () => {
     const dispatch = useDispatch();
@@ -19,47 +22,56 @@ const Carts = () => {
     const loggedInUserEmail = loggedInUser?.email;
 
     useEffect(() => {
-        dispatch(fetchProducts());
-        dispatch(fetchCartItems({ email: loggedInUserEmail }));
-    }, [loggedInUserEmail]);
+        const fun = async () => {
+            const productData = await fetchProducts();
+            const cartData = await fetchCartItems({ email: loggedInUserEmail });
+            const favoriteData = await fetchFavorites({
+                email: loggedInUserEmail,
+            });
 
-    const handleFavoriteClick = (prod) => {
-        // dispatch();
-        dispatch(
-            toggleFavorite({ email: loggedInUserEmail, productId: prod._id })
-        );
+            if (productData && cartData && favoriteData) {
+                dispatch(fetchProductsSuccess(productData));
+                dispatch(setCartItems(cartData));
+                dispatch(setFavorites(favoriteData.favorites));
+            }
+        };
+        fun();
+    }, [dispatch, loggedInUserEmail]);
+
+    const handleFavoriteClick = async (prod) => {
+        const favoritesData = await toggleFavorite({
+            email: loggedInUserEmail,
+            productId: prod._id,
+        });
+        // console.log(favoritesData.favorites);
+        dispatch(setFavorites(favoritesData.favorites));
+        toast.success("Items added to favorites", {
+            position: "top-center",
+            autoClose: 1000,
+        });
     };
 
-    const handleQuantityChange = (item, type) => {
-        console.log("funciton check:::: ", item, type);
+    const handleQuantityChange = async (item, type) => {
+        let message = "";
         if (type === "increase") {
-            dispatch(
-                addToCart({
-                    email: loggedInUserEmail,
-                    productId: item.productId,
-                    quantity: item.quantity + 1,
-                })
-            );
-        } else if (type === "decrease") {
-            if (item.quantity > 1) {
-                dispatch(
-                    addToCart({
-                        email: loggedInUserEmail,
-                        productId: item.productId,
-                        quantity: item.quantity - 1,
-                    })
-                );
-            } else {
-                console.log("Items should be removed: ", item.productId);
-                dispatch(
-                    addToCart({
-                        email: loggedInUserEmail,
-                        productId: item.productId,
-                        quantity: item.quantity - 1,
-                    })
-                );
-            }
+            item.quantity = item.quantity + 1;
+            message = "Item Quantity Increased";
+        } else {
+            item.quantity = item.quantity - 1;
+            if (item.quantity === 0) message = "Item removed from the cart";
+            else message = "Item Quantity Decreased";
         }
+        const response = await addToCart(
+            loggedInUserEmail,
+            item._id,
+            item.quantity
+        );
+        // console.log(response);
+        toast.success(message, {
+            position: "top-center",
+            autoClose: 1000,
+        });
+        dispatch(setCartItems(response));
     };
 
     const cartArray = Object.values(cartItems);
@@ -75,8 +87,6 @@ const Carts = () => {
             ...productDetails,
         };
     });
-
-    // console.log("Merged Cart Items:", uniqueCartItems);
 
     return (
         <div className="flex flex-col md:justify-center p-10 bg-white mt-5 rounded-lg shadow-2xl max-w-6xl mx-auto">

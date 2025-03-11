@@ -1,6 +1,7 @@
 import { User, Camera, Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Profile = () => {
     const [formData, setFormData] = useState({
@@ -69,7 +70,11 @@ const Profile = () => {
             }
 
             const data = await response.json();
-            alert("Profile updated successfully!");
+            // alert("Profile updated successfully!");
+            toast.success("Profile Updated Successfully", {
+                position: "top-center",
+                autoClose: 1000,
+            });
             setFormData(data);
         } catch (error) {
             console.error("Failed to update profile");

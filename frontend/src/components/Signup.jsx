@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { signupApi } from "../api/apiUtil";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../features/authSlice";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -12,6 +14,7 @@ const Signup = () => {
     });
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,9 +23,14 @@ const Signup = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const result = await signupApi(formData);
-        // console.log(result);
 
-        if (result !== null) {
+        if (result.success === false) {
+            toast.success(`${result.message}`, {
+                position: "top-center",
+                autoClose: 3000,
+            });
+            navigate("/signup");
+        } else {
             dispatch(loginSuccess());
             localStorage.setItem("isAuth", true);
             localStorage.setItem("user", JSON.stringify(result.user));
@@ -32,7 +40,11 @@ const Signup = () => {
                 password: "",
                 contactNumber: "",
             });
-            alert("Login Success");
+            toast.success("Signup Success!", {
+                position: "top-center",
+                autoClose: 3000,
+            });
+            navigate("/");
         }
     };
 

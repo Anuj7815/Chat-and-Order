@@ -15,6 +15,7 @@ import Favorites from "./components/Favorites";
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { handleLogout } from "./api/apiUtil";
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -25,7 +26,8 @@ const App = () => {
 
     return (
         <>
-            {isAuthenticated && <Navbar handleLogout={handleLogout} />}
+            <ToastContainer />
+            {isAuthenticated && <Navbar />}
 
             <Routes>
                 <Route

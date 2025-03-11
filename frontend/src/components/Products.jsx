@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCartItems, fetchProducts } from "../api/apiUtil";
 import { toggleFavorite, addToCart, fetchFavorites } from "../api/apiUtil";
-import { logoutSuccess } from "../features/authSlice";
-import { setProducts } from "../features/productSlice";
+import { fetchProductsSuccess } from "../features/productSlice";
 import { setCartItems, setFavorites } from "../features/cartSlice";
+import { toast } from "react-toastify";
 
 const Products = () => {
     const dispatch = useDispatch();
@@ -13,26 +13,40 @@ const Products = () => {
         (state) => state.cart
     );
 
-    const [loggedInUserEmail, setLoggedInUserEmail] = useState("");
+    const loggedInUser = JSON.parse(localStorage.getItem("user"));
+    const loggedInuserEmail = loggedInUser?.email;
 
     useEffect(() => {
-        const loggedInUser = JSON.parse(localStorage.getItem("user"));
-        console.log(loggedInUser);
-        setLoggedInUserEmail(loggedInUser?.email || "");
-    }, []);
+        const productPage = async () => {
+            const productData = await fetchProducts();
+            dispatch(fetchProductsSuccess(productData));
 
-    useEffect(() => {
-        dispatch(fetchProducts());
-    }, []);
+            const favoriteDataProduct = await fetchFavorites({
+                email: loggedInuserEmail,
+            });
+            // console.log(favoriteDataProduct.favorites);
+            dispatch(setFavorites(favoriteDataProduct.favorites));
+        };
+        productPage();
+    }, [dispatch, loggedInuserEmail]);
 
-    const handleFavoriteClick = (prod) => {
-        dispatch(
-            toggleFavorite({ email: loggedInUserEmail, productId: prod._id })
-        );
+    const handleFavoriteClick = async (prod) => {
+        const favoritesData = await toggleFavorite({
+            email: loggedInuserEmail,
+            productId: prod._id,
+        });
+        // console.log(favoritesData);
+        // console.log("Favorites at products", favoritesData);
+        toast.success("Item added to favorites", {
+            position: "top-center",
+            autoClose: 1000,
+        });
+        dispatch(setFavorites(favoritesData.favorites));
     };
 
-    const handleBuyNowClick = (prod) => {
+    const handleBuyNowClick = async (prod) => {
         const cartArray = Object.values(cartItems);
+        // console.log(cartArray);
 
         const uniqueCartItems = cartArray.flat().map((cartItem) => {
             const productDetails = products.find(
@@ -43,20 +57,26 @@ const Products = () => {
                 ...productDetails,
             };
         });
-        console.log(uniqueCartItems);
+        // console.log(uniqueCartItems);
 
         // Find the product inside uniqueCartItems
         const selectedCartItem = uniqueCartItems.find(
             (item) => item.productId === prod._id
         );
         const quantity = selectedCartItem ? selectedCartItem.quantity + 1 : 1;
-        dispatch(
-            addToCart({
-                email: loggedInUserEmail,
-                productId: prod._id,
-                quantity,
-            })
-        );
+
+        const response = await addToCart(loggedInuserEmail, prod._id, quantity);
+        // console.log(response);
+        if (response) {
+            const updateCartItems = await fetchCartItems({
+                email: loggedInuserEmail,
+            });
+            toast.success("Item added to the Cart", {
+                position: "top-center",
+                autoClose: 1000,
+            });
+            dispatch(setCartItems(updateCartItems));
+        }
     };
 
     // console.log(products);

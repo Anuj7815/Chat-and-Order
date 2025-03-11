@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchProducts, toggleFavorite, fetchFavorites } from "../api/apiUtil";
 import { setFavorites } from "../features/cartSlice";
+import { fetchProductsSuccess } from "../features/productSlice";
+import { toast } from "react-toastify";
 
 const Favorites = () => {
     const dispatch = useDispatch();
@@ -10,18 +12,32 @@ const Favorites = () => {
     const loggedInUser = JSON.parse(localStorage.getItem("user"));
     const loggedInUserEmail = loggedInUser?.email;
 
-    // working fine until last modified
     useEffect(() => {
-        if (loggedInUserEmail) {
-            dispatch(fetchProducts());
-            dispatch(fetchFavorites({ email: loggedInUserEmail }));
-        }
-    }, [loggedInUserEmail]);
+        const fun = async () => {
+            const productData = await fetchProducts();
+            const favoritesData = await fetchFavorites({
+                email: loggedInUserEmail,
+            });
+            // console.log(favoritesData);
+            if (favoritesData) {
+                dispatch(fetchProductsSuccess(productData));
+                dispatch(setFavorites(favoritesData.favorites));
+            }
+        };
+        fun();
+    }, [dispatch, loggedInUserEmail]);
 
     const handleFavoriteClick = async (prod) => {
-        dispatch(
-            toggleFavorite({ email: loggedInUserEmail, productId: prod._id })
-        );
+        const favoritesData = await toggleFavorite({
+            email: loggedInUserEmail,
+            productId: prod._id,
+        });
+        // console.log(favoritesData);
+        dispatch(setFavorites(favoritesData.favorites));
+        toast.success("Items removed from favorites", {
+            position: "top-center",
+            autoClose: 1000,
+        });
     };
 
     const cartItems = products.filter((prod) => favorites.includes(prod._id));

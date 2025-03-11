@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import viteLogo from "/vite.svg";
 import { FaShoppingCart } from "react-icons/fa";
@@ -6,34 +6,44 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchFavorites, fetchCartItems } from "../api/apiUtil";
 import { CgProfile } from "react-icons/cg";
 import { GrFavorite } from "react-icons/gr";
-import { loginSuccess, logoutSuccess } from "../features/authSlice";
+import { logoutSuccess } from "../features/authSlice";
+import { setCartItems, setFavorites } from "../features/cartSlice";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const favorites = useSelector((state) => state.cart.favorites || []);
-    // const [favoriteCount, setFavoriteCount] = useState(favorites.length);
     const favoriteCount = favorites.length;
     const cart = useSelector((state) => state.cart.cartItems);
     const cartCount = Object.values(cart).flat().length;
+
     const loggedInUser = JSON.parse(localStorage.getItem("user"));
     const loggedInUserEmail = loggedInUser?.email || "";
 
-    useEffect(() => {
-        if (!loggedInUserEmail) return;
-        dispatch(loginSuccess());
-        dispatch(fetchFavorites({ email: loggedInUserEmail }));
-        dispatch(fetchCartItems({ email: loggedInUserEmail }));
-    }, []);
-
-    // useEffect(() => {
-    //     setFavoriteCount(favorites.length);
-    // }, [favorites, cart]);
-
     const handleLogout = () => {
         dispatch(logoutSuccess());
+        toast.success("Logout Success!", {
+            position: "top-center",
+            autoClose: 3000,
+        });
         navigate("/login");
     };
+
+    useEffect(() => {
+        const navbarPage = async () => {
+            const cartDataNavbar = await fetchCartItems({
+                email: loggedInUserEmail,
+            });
+
+            dispatch(setCartItems(cartDataNavbar));
+            const favoriteDataNavbar = await fetchFavorites({
+                email: loggedInUserEmail,
+            });
+            dispatch(setFavorites(favoriteDataNavbar.favorites));
+        };
+        navbarPage();
+    }, [dispatch, loggedInUserEmail]);
 
     return (
         <nav className="bg-gray-900 shadow-md py-3 px-6 flex justify-between items-center">
