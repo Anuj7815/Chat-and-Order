@@ -4,6 +4,7 @@ import { MessageCircle } from "lucide-react";
 import React from "react";
 import { usersApi } from "../api/apiUtil";
 import { logoutSuccess } from "../features/authSlice";
+import { toast } from "react-toastify";
 
 const UsersPage = () => {
     const [users, setUsers] = useState([]);
@@ -14,10 +15,7 @@ const UsersPage = () => {
         const fetchUsersData = async () => {
             const data = await usersApi();
             // console.log(data);
-            if (data.success === false) {
-                dispatchEvent(logoutSuccess());
-                navigate("/login");
-            }
+
             setUsers(data);
         };
         fetchUsersData();

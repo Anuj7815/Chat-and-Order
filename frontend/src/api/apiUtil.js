@@ -1,24 +1,31 @@
 const URL = "http://localhost:5000";
+import { logoutSuccess } from "../features/authSlice";
+import { store } from "../app/store";
+import { useNavigate } from "react-router-dom";
 
 const handleApiResponse = async (response) => {
     try {
         const data = await response.json();
-        console.log(data.message);
+        // console.log(data.message);
 
         const stat = response.status;
         // console.log("Status", stat);
-        if (stat === 200 || stat === 201) {
+        if (stat >= 200 && stat <= 299) {
             return data;
-        } else if (stat >= 400 && stat <= 499) {
-            return {
-                sucess: false,
-                message: data.message,
-            };
         } else {
-            return {
-                success: false,
-                message: data.message,
-            };
+            if (stat === 401) {
+                store.dispatch(logoutSuccess());
+                window.location.ref = "/login";
+                return {
+                    sucess: false,
+                    message: data.message,
+                };
+            } else {
+                return {
+                    success: false,
+                    message: data.message,
+                };
+            }
         }
     } catch (error) {
         console.error("Unknown error occurred");

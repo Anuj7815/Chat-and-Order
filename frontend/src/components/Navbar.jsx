@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import viteLogo from "/vite.svg";
-import { FaShoppingCart } from "react-icons/fa";
+import Shopy from "/Shopy.png";
+import { FaShoppingCart, FaBars, FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchFavorites, fetchCartItems } from "../api/apiUtil";
 import { CgProfile } from "react-icons/cg";
@@ -13,6 +14,8 @@ import { toast } from "react-toastify";
 const Navbar = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const [menuOpen, setMenuOpen] = useState(false);
+
     const favorites = useSelector((state) => state.cart.favorites || []);
     const favoriteCount = favorites.length;
     const cart = useSelector((state) => state.cart.cartItems);
@@ -46,87 +49,186 @@ const Navbar = () => {
     }, [dispatch, loggedInUserEmail]);
 
     return (
-        <nav className="bg-gray-900 shadow-md py-3 px-6 flex justify-between items-center">
-            {/* Left Side - Logo */}
-            <div className="flex items-center space-x-2">
-                <img src={viteLogo} alt="Vite Logo" className="w-8 h-8" />
-                <span className="text-xl font-bold text-white">Vite App</span>
-            </div>
-
-            {/* Center - Navigation Links */}
-            <div className="hidden md:flex space-x-6">
-                <Link
-                    to="/"
-                    className="text-white hover:text-blue-600 transition"
-                >
-                    Home
-                </Link>
-                <Link
-                    to="/users"
-                    className="text-white hover:text-blue-600 transition"
-                >
-                    Users
-                </Link>
-                <Link
-                    to="/products"
-                    className="text-white hover:text-blue-600 transition"
-                >
-                    Products
-                </Link>
-                <Link
-                    to="/services"
-                    className="text-white hover:text-blue-600 transition"
-                >
-                    Services
-                </Link>
-            </div>
-
-            {/* Right Side - Login/Logout Button */}
-            <div className="flex items-center space-x-4">
-                <a
-                    onClick={() => navigate("/cart")}
-                    className="relative flex items-center text-sm font-semibold text-gray-900 dark:text-white cursor-pointer"
-                >
-                    <span className="absolute -top-3 -right-2 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs rounded-full">
-                        {cartCount > 0 ? cartCount : 0}
+        <nav className="bg-gray-900 shadow-md py-3 px-6">
+            <div className="flex justify-between items-center">
+                {/* Logo */}
+                <div className="flex items-center space-x-2">
+                    <img src={Shopy} alt="Vite Logo" className="w-8 h-8" />
+                    <span className="text-xl font-bold text-white">
+                        ShopyChat
                     </span>
-                    <FaShoppingCart className="text-lg" size={20} />
-                </a>
+                </div>
 
-                <a
-                    onClick={() => navigate("/favorites")}
-                    className="relative flex items-center text-sm font-semibold text-gray-900 dark:text-white cursor-pointer"
-                >
-                    <span className="absolute -top-3 -right-2 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs rounded-full">
-                        {favoriteCount > 0 ? favoriteCount : 0}
-                    </span>
-                    {/* <BookmarksIcon
-                        className="text-white"
+                {/* Hamburger Menu for Mobile */}
+                <div className="md:hidden">
+                    <button
+                        onClick={() => setMenuOpen(!menuOpen)}
+                        className="text-white text-2xl focus:outline-none"
+                    >
+                        {menuOpen ? <FaTimes /> : <FaBars />}
+                    </button>
+                </div>
+
+                {/* Navigation Links (Desktop) */}
+                <div className="hidden md:flex space-x-6">
+                    <Link
+                        to="/"
+                        className="text-white hover:text-blue-400 transition"
+                    >
+                        Home
+                    </Link>
+                    <Link
+                        to="/users"
+                        className="text-white hover:text-blue-400 transition"
+                    >
+                        Users
+                    </Link>
+                    <Link
+                        to="/products"
+                        className="text-white hover:text-blue-400 transition"
+                    >
+                        Products
+                    </Link>
+                    <Link
+                        to="/services"
+                        className="text-white hover:text-blue-400 transition"
+                    >
+                        Services
+                    </Link>
+                </div>
+
+                {/* Right Side - Cart, Favorites, Profile, Logout */}
+                <div className="hidden md:flex items-center space-x-6">
+                    {/* Cart */}
+                    <button
+                        onClick={() => navigate("/cart")}
+                        className="relative text-white"
+                    >
+                        <FaShoppingCart size={20} />
+                        {cartCount > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs rounded-full">
+                                {cartCount}
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Favorites */}
+                    <button
                         onClick={() => navigate("/favorites")}
-                    /> */}
-                    <GrFavorite
-                        className="text-white"
-                        onClick={() => navigate("/favorites")}
-                        size={20}
-                    />
-                </a>
+                        className="relative text-white"
+                    >
+                        <GrFavorite size={20} />
+                        {favoriteCount > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs rounded-full">
+                                {favoriteCount}
+                            </span>
+                        )}
+                    </button>
 
-                <button
-                    onClick={handleLogout}
-                    className="bg-blue-500 text-white px-5 py-3 rounded-full hover:bg-blue-600 transition cursor-pointer"
-                >
-                    Logout
-                </button>
-
-                <div className="w-8 h-8 rounded-full flex justify-center items-center">
-                    <a
+                    {/* Profile */}
+                    <button
                         onClick={() => navigate("/profile")}
-                        className=" text-gray-900 dark:text-white cursor-pointer text-2xl"
+                        className="text-white text-2xl"
                     >
                         <CgProfile />
-                    </a>
+                    </button>
+
+                    {/* Logout */}
+                    <button
+                        onClick={handleLogout}
+                        className="bg-blue-500 text-white px-5 py-2 rounded-full hover:bg-blue-600 transition"
+                    >
+                        Logout
+                    </button>
                 </div>
             </div>
+
+            {/* Mobile Menu */}
+            {menuOpen && (
+                <div className="md:hidden flex flex-col items-center mt-4 space-y-4">
+                    {/* Centered Links */}
+                    <div className="flex flex-col items-center space-y-3">
+                        <Link
+                            to="/"
+                            className="text-white hover:text-blue-400 transition"
+                            onClick={() => setMenuOpen(false)}
+                        >
+                            Home
+                        </Link>
+                        <Link
+                            to="/users"
+                            className="text-white hover:text-blue-400 transition"
+                            onClick={() => setMenuOpen(false)}
+                        >
+                            Users
+                        </Link>
+                        <Link
+                            to="/products"
+                            className="text-white hover:text-blue-400 transition"
+                            onClick={() => setMenuOpen(false)}
+                        >
+                            Products
+                        </Link>
+                        <Link
+                            to="/services"
+                            className="text-white hover:text-blue-400 transition"
+                            onClick={() => setMenuOpen(false)}
+                        >
+                            Services
+                        </Link>
+                    </div>
+
+                    {/* Icons in a Single Row with Equal Space */}
+                    <div className="flex justify-center space-x-6">
+                        <button
+                            onClick={() => {
+                                navigate("/cart");
+                                setMenuOpen(false);
+                            }}
+                            className="relative text-white"
+                        >
+                            <FaShoppingCart size={20} />
+                            {cartCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs rounded-full">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                navigate("/favorites");
+                                setMenuOpen(false);
+                            }}
+                            className="relative text-white"
+                        >
+                            <GrFavorite size={20} />
+                            {favoriteCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs rounded-full">
+                                    {favoriteCount}
+                                </span>
+                            )}
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                navigate("/profile");
+                                setMenuOpen(false);
+                            }}
+                            className="text-white text-2xl"
+                        >
+                            <CgProfile />
+                        </button>
+
+                        <button
+                            onClick={handleLogout}
+                            className="bg-blue-500 text-white px-5 py-2 rounded-full hover:bg-blue-600 transition"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 };
